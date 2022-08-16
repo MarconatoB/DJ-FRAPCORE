@@ -11,4 +11,4 @@
 ## TODO
 
 * envoyer périodiquement des commandes à fredboat pour l'alimenter de bangers
-* FredBoat ignore les messages 
+* FredBoat ignore les messages

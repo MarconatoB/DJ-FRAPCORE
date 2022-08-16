@@ -48,5 +48,6 @@ async def on_message(message):
             response = response + banger
         await message.channel.send(response)
     if message.content.startswith('!pick'):
-        await message.channel.send('/play ' + random.choice(bangers_URL))
+        await message.channel.send(';;play ' + random.choice(bangers_URL))
+        
 client.run(TOKEN)
