@@ -1,24 +1,39 @@
 import os
 
-from discord.ext import commands
+import discord
 from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot(command_prefix='!')
+client = discord.Client()
 
-@bot.event
+bangers_URL = []
+
+def add_banger_if_new(url):
+    if url in bangers_URL:
+        return
+    else:
+        bangers_URL.append(url)
+        return
+
+@client.event
 async def on_ready():
-    print(f'{bot.user.name} has connected to Discord!')
+    print(f'{client.user.name} has connected to Discord!')
 
-
-
+@client.event
 async def on_message(message):
-    if message.author == bot.user:
-        return
-    
-    if message.content == ';;play':
+    print(message.content)
+    if message.author == client.user:
         return
 
-bot.run(TOKEN)
+    if message.content.startswith(';;play https://'):
+        add_banger_if_new(message.content[7:])
+    elif message.content.startswith(';;playnext https://'):
+        add_banger_if_new(message.content[11:])
+
+    if message.content.startswith('!list bangers'):
+        for banger in bangers_URL:
+            await message.channel.send(banger)
+        
+client.run(TOKEN)
