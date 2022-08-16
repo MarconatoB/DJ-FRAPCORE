@@ -4,7 +4,9 @@
 
 * `git clone https://github.com/MarconatoB/DJ-FRAPCORE.git`
 
-* `pip install -r requirements.txt`
+* `pip install -r requirements.txt ffmpeg`
+
+* `Ajouter le dossier bin de ffmpeg à ton PATH`
 
 * `python dj.py`
 
