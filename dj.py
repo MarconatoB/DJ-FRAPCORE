@@ -1,4 +1,6 @@
+from audioop import findfactor
 import os
+import random
 
 import discord
 from dotenv import load_dotenv
@@ -21,9 +23,14 @@ def add_banger_if_new(url):
 async def on_ready():
     print(f'{client.user.name} has connected to Discord!')
 
+    global bangers_URL
+    reader = open('bangers.txt')
+    bangers_URL = list(reader)
+    print('Imported ' + str(len(bangers_URL)) + ' bangers from bangers.txt')
+
 @client.event
 async def on_message(message):
-    print(message.content)
+    print('new message : ' + message.content)
     if message.author == client.user:
         return
 
@@ -33,7 +40,10 @@ async def on_message(message):
         add_banger_if_new(message.content[11:])
 
     if message.content.startswith('!list bangers'):
+        response = ''
         for banger in bangers_URL:
-            await message.channel.send(banger)
-        
+            response = response + banger
+        await message.channel.send(response)
+    if message.content.startswith('!pick'):
+        await message.channel.send(random.choice(bangers_URL))
 client.run(TOKEN)
