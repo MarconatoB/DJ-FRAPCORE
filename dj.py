@@ -17,6 +17,9 @@ def add_banger_if_new(url):
         return
     else:
         bangers_URL.append(url)
+        file = open('bangers.txt', 'a')
+        file.write(url + '\n')
+        file.close()
         return
 
 @client.event
@@ -45,5 +48,5 @@ async def on_message(message):
             response = response + banger
         await message.channel.send(response)
     if message.content.startswith('!pick'):
-        await message.channel.send(random.choice(bangers_URL))
+        await message.channel.send('/play ' + random.choice(bangers_URL))
 client.run(TOKEN)

@@ -10,5 +10,5 @@
 
 ## TODO
 
-* sauvegarder les bangers dans un fichier
 * envoyer périodiquement des commandes à fredboat pour l'alimenter de bangers
+* FredBoat ignore les messages 
