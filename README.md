@@ -4,13 +4,13 @@
 
 * `git clone https://github.com/MarconatoB/DJ-FRAPCORE.git`
 
-* `pip install -r requirements.txt ffmpeg`
+* `pip install ffmpeg`
 
-* `Ajouter le dossier bin de ffmpeg à ton PATH`
+* `Télécharger ffmpeg et ajouter le dossier bin de ffmpeg à ton PATH ( jsp comment faire sur mac / raspberry pi)`
 
 * `python dj.py`
 
 ## TODO
 
-* envoyer périodiquement des commandes à fredboat pour l'alimenter de bangers
-* FredBoat ignore les messages 
+* rajouter un argument à pick pour choisir le nombre de musique à play
+* faire en sorte de rajouter des données dans le tableau
