@@ -422,6 +422,13 @@ class Music(commands.Cog):
             else:
                 song = Song(source)
 
+                if (song.source.url) + "\n" not in bangers_URL:
+                    print(song.source.url)
+                    print(bangers_URL)
+                    bangers_URL.append(song.source.url)
+                    file = open('bangers.txt', 'a')
+                    file.write(song.source.url + '\n')
+                    file.close()
                 await ctx.voice_state.songs.put(song)
                 await ctx.send('Enqueued {}'.format(str(source)))
 

@@ -13,4 +13,4 @@
 ## TODO
 
 * rajouter un argument à pick pour choisir le nombre de musique à play
-* faire en sorte de rajouter des données dans le tableau
+* enlever le bordel du now playing
