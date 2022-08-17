@@ -74,7 +74,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.stream_url = data.get('url')
 
     def __str__(self):
-        return '**{0.title}** by **{0.uploader}**'.format(self)
+        return '**{0.title}** est demandé par **{0.uploader}**'.format(self)
 
     @classmethod
     async def create_source(cls, ctx: commands.Context, search: str, *, loop: asyncio.BaseEventLoop = None):
@@ -144,14 +144,15 @@ class Song:
         self.requester = source.requester
 
     def create_embed(self):
-        embed = (discord.Embed(title='Now playing',
+        embed = (discord.Embed(title='Le son qui pousse les basses',
                                description='```css\n{0.source.title}\n```'.format(self),
                                color=discord.Color.blurple())
                  .add_field(name='Duration', value=self.source.duration)
                  .add_field(name='Requested by', value=self.requester.mention)
-                 .add_field(name='Uploader', value='[{0.source.uploader}]({0.source.uploader_url})'.format(self))
-                 .add_field(name='URL', value='[Click]({0.source.url})'.format(self))
-                 .set_thumbnail(url=self.source.thumbnail))
+                 #.add_field(name='Uploader', value='[{0.source.uploader}]({0.source.uploader_url})'.format(self))
+                 #.add_field(name='URL', value='[Click]({0.source.url})'.format(self))
+                 #.set_thumbnail(url=self.source.thumbnail)
+                 )
         #embed = "Maintenant c'est" + {self.source.title} + "qui pète sa mère"
         return embed
 
@@ -236,7 +237,9 @@ class VoiceState:
 
             self.current.source.volume = self._volume
             self.voice.play(self.current.source, after=self.play_next_song)
+            #print(Song.source.title)
             await self.current.source.channel.send(embed=self.current.create_embed())
+            #await self.current.source.channel.send("Maintenant c'est " + self.source.title + " qui pète sa mère")
 
             await self.next.wait()
 
@@ -354,7 +357,7 @@ class Music(commands.Cog):
                 song = Song(source)
 
                 await ctx.voice_state.songs.put(song)
-                await ctx.send('Enqueued {}'.format(str(source)))
+                await ctx.send('Le banger {}'.format(str(source)))
 
     @_join.before_invoke
     @_pick.before_invoke
@@ -430,7 +433,7 @@ class Music(commands.Cog):
                     file.write(song.source.url + '\n')
                     file.close()
                 await ctx.voice_state.songs.put(song)
-                await ctx.send('Enqueued {}'.format(str(source)))
+                await ctx.send('Le banger {}'.format(str(source)))
 
     @_join.before_invoke
     @_play.before_invoke
