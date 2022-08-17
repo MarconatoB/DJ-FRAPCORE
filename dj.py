@@ -152,7 +152,7 @@ class Song:
                  .add_field(name='Uploader', value='[{0.source.uploader}]({0.source.uploader_url})'.format(self))
                  .add_field(name='URL', value='[Click]({0.source.url})'.format(self))
                  .set_thumbnail(url=self.source.thumbnail))
-
+        #embed = "Maintenant c'est" + {self.source.title} + "qui pète sa mère"
         return embed
 
 
