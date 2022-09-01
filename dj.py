@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+URL_music_played = ''
 
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -178,8 +179,8 @@ class SongQueue(asyncio.Queue):
     def shuffle(self):
         random.shuffle(self._queue)
 
-    def remove(self, index: int):
-        del self._queue[index]
+    ##def remove(self, index: int):
+    ##    del self._queue[index]
 
 
 class VoiceState:
@@ -226,12 +227,8 @@ class VoiceState:
             self.next.clear()
 
             if not self.loop:
-                # Try to get the next song within 3 minutes.
-                # If no song will be added to the queue in time,
-                # the player will disconnect due to performance
-                # reasons.
                 try:
-                    async with timeout(180):  # 3 minutes
+                    async with timeout(1000): 
                         self.current = await self.songs.get()
                 except asyncio.TimeoutError:
                     self.bot.loop.create_task(self.stop())
@@ -375,6 +372,14 @@ class Music(commands.Cog):
     @commands.command(name='skip', aliases=['s'])
     async def _skip(self, ctx: commands.Context):
 
+        if not ctx.voice_state.is_playing:
+            return await ctx.send('Not playing any music right now...')
+        ctx.voice_state.skip()
+        return await ctx.send("La 'zic est terminado")
+
+    @commands.command(name='remove', aliases=['r'])
+    async def _remove(self, ctx: commands.Context):
+        print('[Click]({0.source.url})'.format(self))
         if not ctx.voice_state.is_playing:
             return await ctx.send('Not playing any music right now...')
         ctx.voice_state.skip()
