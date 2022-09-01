@@ -1,4 +1,5 @@
 import asyncio
+from ctypes import sizeof
 import functools
 import itertools
 import math
@@ -14,7 +15,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-URL_music_played = ''
+URL_music_played = ""
 
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -235,6 +236,10 @@ class VoiceState:
                     return
 
             self.current.source.volume = self._volume
+            global URL_music_played
+            URL_music_played = self.current.source.url
+            #print(self.current.source.url)
+            print("AUDIO player :"+URL_music_played)
             self.voice.play(self.current.source, after=self.play_next_song)
             #print(Song.source.title)
             await self.current.source.channel.send(embed=self.current.create_embed())
@@ -343,20 +348,21 @@ class Music(commands.Cog):
         return await ctx.send(response)
 
     @commands.command(name='pick', aliases=['bangers'])
-    async def _pick(self, ctx: commands.Context):
+    async def _pick(self, ctx: commands.Context, taille:int=1):
         if not ctx.voice_state.voice:
             await ctx.invoke(self._join)
 
         async with ctx.typing():
-            try:
-                source = await YTDLSource.create_source(ctx, random.choice(bangers_URL), loop=self.bot.loop)
-            except YTDLError as e:
-                await ctx.send('An error occurred while processing this request: {}'.format(str(e)))
-            else:
-                song = Song(source)
+            for i in range(taille):
+                try:
+                    source = await YTDLSource.create_source(ctx, random.choice(bangers_URL), loop=self.bot.loop)
+                except YTDLError as e:
+                    await ctx.send('An error occurred while processing this request: {}'.format(str(e)))
+                else:
+                    song = Song(source)
 
-                await ctx.voice_state.songs.put(song)
-                await ctx.send('Vas-y DJ fais péter le son {}'.format(str(source)))
+                    await ctx.voice_state.songs.put(song)
+                    await ctx.send('Vas-y DJ fais péter le son {}'.format(str(source)))
 
     @_join.before_invoke
     @_pick.before_invoke
@@ -379,7 +385,12 @@ class Music(commands.Cog):
 
     @commands.command(name='remove', aliases=['r'])
     async def _remove(self, ctx: commands.Context):
-        print('[Click]({0.source.url})'.format(self))
+        print("command : "+URL_music_played)
+        bangers_URL.remove(URL_music_played+"\n")
+        print(len(bangers_URL))
+        file = open('bangers.txt', 'w')
+        file.write(''.join(bangers_URL))
+        file.close()
         if not ctx.voice_state.is_playing:
             return await ctx.send('Not playing any music right now...')
         ctx.voice_state.skip()
