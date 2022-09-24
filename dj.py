@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 URL_music_played = ""
+JOUE = 0
 
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -36,12 +37,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
         'audioformat': 'mp3',
         'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
         'restrictfilenames': True,
-        'noplaylist': True,
+        'noplaylist': False,
         'nocheckcertificate': True,
         'ignoreerrors': False,
         'logtostderr': False,
         'quiet': True,
         'no_warnings': True,
+        'maxBuffer': 'Infinity',
         'default_search': 'auto',
         'source_address': '0.0.0.0',
     }
@@ -193,6 +195,7 @@ class VoiceState:
         self.voice = None
         self.next = asyncio.Event()
         self.songs = SongQueue()
+        self.temp = SongQueue()
 
         self._loop = False
         self._volume = 1.0
@@ -229,7 +232,7 @@ class VoiceState:
 
             if not self.loop:
                 try:
-                    async with timeout(1000): 
+                    async with timeout(10000): 
                         self.current = await self.songs.get()
                 except asyncio.TimeoutError:
                     self.bot.loop.create_task(self.stop())
@@ -405,7 +408,7 @@ class Music(commands.Cog):
         if len(ctx.voice_state.songs) == 0:
             return await ctx.send('Empty queue.')
 
-        items_per_page = 10
+        items_per_page = 20
         pages = math.ceil(len(ctx.voice_state.songs) / items_per_page)
 
         start = (page - 1) * items_per_page
@@ -463,7 +466,65 @@ class Music(commands.Cog):
             if ctx.voice_client.channel != ctx.author.voice.channel:
                 raise commands.CommandError('Bot is already in a voice channel.')
 
+    @commands.command(name='playnext')
+    async def _playnext(self, ctx: commands.Context, *, search: str):
 
+        if not ctx.voice_state.voice:
+            await ctx.invoke(self._join)
+
+        async with ctx.typing():
+            try:
+                source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
+            except YTDLError as e:
+                await ctx.send('An error occurred while processing this request: {}'.format(str(e)))
+            else:
+                song = Song(source)
+                await ctx.voice_state.temp.put(song)
+                for i in  range(len(ctx.voice_state.songs)):
+                    await ctx.voice_state.temp.put(ctx.voice_state.songs.get())
+                for i in  range(len(ctx.voice_state.temp)):
+                    await ctx.voice_state.songs.put(ctx.voice_state.temp.get())
+                await ctx.voice_state.temp.empty()
+                await ctx.send('Le banger {}'.format(str(source)))
+
+    @_join.before_invoke
+    @_playnext.before_invoke
+    async def ensure_voice_state(self, ctx: commands.Context):
+        if not ctx.author.voice or not ctx.author.voice.channel:
+            raise commands.CommandError('You are not connected to any voice channel.')
+
+        if ctx.voice_client:
+            if ctx.voice_client.channel != ctx.author.voice.channel:
+                raise commands.CommandError('Bot is already in a voice channel.')
+
+    @commands.command(name='try')
+    async def _try(self, ctx: commands.Context, *, search: str):
+
+        if not ctx.voice_state.voice:
+            await ctx.invoke(self._join)
+
+        async with ctx.typing():
+            try:
+                source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
+            except YTDLError as e:
+                await ctx.send('An error occurred while processing this request: {}'.format(str(e)))
+            else:
+                song = Song(source)
+
+                await ctx.voice_state.songs.put(song)
+                await ctx.send('Le banger {}'.format(str(source)))
+
+    @_join.before_invoke
+    @_try.before_invoke
+    async def ensure_voice_state(self, ctx: commands.Context):
+        if not ctx.author.voice or not ctx.author.voice.channel:
+            raise commands.CommandError('You are not connected to any voice channel.')
+
+        if ctx.voice_client:
+            if ctx.voice_client.channel != ctx.author.voice.channel:
+                raise commands.CommandError('Bot is already in a voice channel.')
+
+                
 bot = commands.Bot('!', description='Yet another music bot.')
 bot.add_cog(Music(bot))
 
